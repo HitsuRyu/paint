@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 #include "window.h"
 #include "button.h"
@@ -17,12 +18,19 @@ enum UserEventType
     EVENT_UNSET,
     EVENT_CLEAR,
     EVENT_CHMODE,
+    EVENT_RED,
+    EVENT_GREEN,
+    EVENT_BLUE,
+    EVENT_BLACK
 };
 
 std::vector<Point>	g_vector;
+std::vector<int>    g_color_v;
+int                 g_color_f = 0;
 int					g_mode = 0;
+char				g_text[11];
 Point				g_coords(0,0);
-Point				g_psize(25,25);
+Point				g_psize(10,10);
 
 // родительское окно
 class MainWindow : public Window
@@ -62,14 +70,23 @@ void MainWindow::OnDraw(Context *cr)
 		cr->Text(" Printing ", "Cantarel", 17, Point(900, 625), 0x01);
 	else
 		cr->Text(" Erasing ", "Cantarel", 17, Point(900, 625), 0x01);
-    
-    cr->SetColor(RGB(0,0,0));
+	sprintf(g_text, "%ld", g_vector.size());
+    cr->Text(g_text, "Cantarel", 17, Point(900, 650), 0x01);
+
     for (int i = 0; i < g_vector.size(); i++)
     {
+        if (g_color_v[i] == 0)
+            cr->SetColor(RGB(0,0,0));
+        if (g_color_v[i] == 1)
+            cr->SetColor(RGB(1, 0, 0));
+        if (g_color_v[i] == 2)
+            cr->SetColor(RGB(0, 1, 0));
+        if (g_color_v[i] == 3)
+            cr->SetColor(RGB(0, 0, 1));
         cr->FillRectangle(g_vector[i], g_psize);
     }
 
-    cr->SetColor(RGB(0,0,1));
+    cr->SetColor(RGB(0.5,0.1,0.9));
     cr->FillRectangle(g_coords, g_psize);
 }
 
@@ -85,6 +102,10 @@ void MainWindow::OnCreate()
     AddChild(new Button("UNSET",EVENT_UNSET), Point(200,650), Point(50,50));
     AddChild(new Button(" CLEAR ",EVENT_CLEAR), Point(150,600), Point(100,50));
 	AddChild(new Button(" MODE ",EVENT_CHMODE), Point(750,600), Point(100,50));
+    AddChild(new Button(" R ",EVENT_RED), Point(750,650), Point(25,50));
+    AddChild(new Button(" G ",EVENT_GREEN), Point(775,650), Point(25,50));
+    AddChild(new Button(" B ",EVENT_BLUE), Point(800,650), Point(25,50));
+    AddChild(new Button(" BL ",EVENT_BLACK), Point(825,650), Point(25,50));
 }
 
 void MainWindow::OnSizeChanged()
@@ -106,16 +127,29 @@ void	SetPoint(void)
 		i++;    
 	}
 	if (!found)
-		g_vector.push_back(g_coords);
+    {
+        if (g_color_f == 0)
+            g_color_v.push_back(0);
+        else if (g_color_f == 1)
+            g_color_v.push_back(1);
+        else if (g_color_f == 2)
+            g_color_v.push_back(2);
+        else if (g_color_f == 3)
+            g_color_v.push_back(3);
+        g_vector.push_back(g_coords);
+    }
 }
 
 void	UnsetPoint(void)
 {
-	auto iter = g_vector.cbegin();
+	// auto iter = g_vector.cbegin();
 	for (int i = 0; i < g_vector.size(); i++)
 	{
 		if (g_vector[i].GetX() == g_coords.GetX() && g_vector[i].GetY()==g_coords.GetY())
-			 g_vector.erase(iter + i);
+        {
+            g_color_v.erase(g_color_v.cbegin() + i);
+            g_vector.erase(g_vector.cbegin() + i);
+        }	 
 	}
 }
 
@@ -181,6 +215,26 @@ void MainWindow::OnNotify(Window *child, uint32_t type, const Point &position)
 		if (g_mode == 3)
 			g_mode = 0;
 		ReDraw();
+    }
+    else if(type == EVENT_RED)
+    {
+        g_color_f = 1;
+        ReDraw();
+    }
+    else if(type == EVENT_GREEN)
+    {
+        g_color_f = 2;
+        ReDraw();
+    }
+    else if(type == EVENT_BLUE)
+    {
+        g_color_f = 3;
+        ReDraw();
+    }
+    else if(type == EVENT_BLACK)
+    {
+        g_color_f = 0;
+        ReDraw();
     }
 }
 
