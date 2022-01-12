@@ -31,7 +31,7 @@ int                 g_color_f = 0;
 int					g_mode = 0;
 char				g_text[11];
 Point				g_coords(0,0);
-Point				g_psize(10,10);
+Point				g_psize(15,15);
 int					g_help = 0;
 
 // родительское окно
@@ -62,6 +62,9 @@ void MainWindow::OnDraw(Context *cr)
 	// зальем прямоугольник окна серым цветом
 	cr->SetColor(RGB(0.8,0.8,0.8));
 	cr->FillRectangle(Point(0,0), size);
+
+	cr->SetColor(RGB(1,1,1));
+	cr->FillRectangle(Point(0,0), Point(1000, 600));
 
 	cr->SetColor(RGB(0,0,0));
 	cr->SetLineWidth(3);
